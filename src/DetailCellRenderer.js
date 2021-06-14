@@ -33,7 +33,7 @@ import * as moment from 'moment';
 
 ]*/
 
-const API_URL = '/form';
+const API_URL = '/service/backend/form';
 const {API_KEY} = process.env
 class DetailCellRenderer extends Component {
 

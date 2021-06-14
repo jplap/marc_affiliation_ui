@@ -63,7 +63,7 @@ const {API_KEY} = process.env
 //const API_URL = 'http://api.musicgraph.com/api/v2/artist/suggest'
 
 //const API_URL = 'https://localhost:8686/form/suggest'
-const API_URL = '/form'
+const API_URL = '/service/backend/form'
 
 var tt = [{
     "name": "susan",
