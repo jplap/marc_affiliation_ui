@@ -8,26 +8,27 @@ import IconButton from '@material-ui/core/IconButton';
 //import Collapse from '@material-ui/core/Collapse';
 
 import CloseIcon from '@material-ui/icons/Close';
-import {AgGridReact, AgGridColumn } from 'ag-grid-react';
+import {AgGridReact, AgGridColumn} from 'ag-grid-react';
 import BtnCellRenderer from "./BtnCellRenderer";
 import BtnCellRendererAction from "./BtnCellRendererAction";
 import BtnCellRendererDetails from "./BtnCellRendererDetails";
 import BtnCellRendererHistory from "./BtnCellRendererHistory";
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 import * as moment from 'moment';
 
 import BtnCellRendererRadioGroup from "./BtnCellRendererRadioGroup";
 import Grid from "@material-ui/core/Grid";
 import Box from '@material-ui/core/Box';
-import { Alert, AlertTitle } from '@material-ui/lab';
+import {Alert, AlertTitle} from '@material-ui/lab';
 
-import { ClientSideRowModelModule } from '@ag-grid-community/client-side-row-model';
-import { MasterDetailModule } from '@ag-grid-enterprise/master-detail';
-import { MenuModule } from '@ag-grid-enterprise/menu';
-import { ColumnsToolPanelModule } from '@ag-grid-enterprise/column-tool-panel';
+import {ClientSideRowModelModule} from '@ag-grid-community/client-side-row-model';
+import {MasterDetailModule} from '@ag-grid-enterprise/master-detail';
+import {MenuModule} from '@ag-grid-enterprise/menu';
+import {ColumnsToolPanelModule} from '@ag-grid-enterprise/column-tool-panel';
 import '@ag-grid-community/core/dist/styles/ag-grid.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-alpine.css';
-import { AllModules } from "@ag-grid-enterprise/all-modules";
+import {AllModules} from "@ag-grid-enterprise/all-modules";
 import {AllCommunityModules} from '@ag-grid-community/all-modules';
 
 import DetailCellRenderer from './DetailCellRenderer.js';
@@ -38,6 +39,7 @@ import DetailCellRenderer from './DetailCellRenderer.js';
 //import Radio from "@material-ui/core/Radio";
 //import Button from '@material-ui/core/Button';
 import Button from '@material-ui/core/Button';
+import Checkbox from '@material-ui/core/Checkbox';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import ActionForm from './ActionForm';
@@ -72,7 +74,6 @@ var tt = [{
 }]
 
 
-
 const styles = theme => ({
     buttonContainer1: {
         flex: 1,
@@ -90,17 +91,14 @@ const styles = theme => ({
         },
     },
     fabProgress: {
-        color: "blue" ,
+        color: "blue",
         position: 'absolute',
         top: "50%",
         left: "50%",
         zIndex: 1,
     },
-	monokai:{
-
-	}
+    monokai: {}
 });
-
 
 
 class Search extends Component {
@@ -108,43 +106,45 @@ class Search extends Component {
     constructor(props) {
         super(props);
         this.masterDetail = true;
-/*
+        /*
 
-        this.detailCellRendererParams =
-            {
-                detailGridOptions: {
-                    columnDefs: [
-                        {
-                            headerName: 'callId',
-                            field: 'callId'
+                this.detailCellRendererParams =
+                    {
+                        detailGridOptions: {
+                            columnDefs: [
+                                {
+                                    headerName: 'callId',
+                                    field: 'callId'
+                                },
+
+
+                            ],
+                            defaultColDef: {
+                                flex: 1,
+                                editable: true,
+                                resizable: true
+                            },
+
+                            onGridReady: function (params) {
+                                params.api.setDomLayout('autoHeight');
+                            }
                         },
+                        getDetailRowData: this.getDetailRowData,
+                        /!* getDetailRowData: function (params) {
 
+                             params.successCallback( tt );
+                             //params.successCallback(params.data.callRecords);
+                         },*!/
 
-                    ],
-                    defaultColDef: {
-                        flex: 1,
-                        editable: true,
-                        resizable: true
-                    },
+                    };
 
-                    onGridReady: function (params) {
-                        params.api.setDomLayout('autoHeight');
-                    }
-                },
-                getDetailRowData: this.getDetailRowData,
-                /!* getDetailRowData: function (params) {
-
-                     params.successCallback( tt );
-                     //params.successCallback(params.data.callRecords);
-                 },*!/
-
-            };
-
-*/
-
+        */
 
 
         this.state = {
+            checkedB: false,
+            areaJSONDataStatus : false,
+
             test: "jpl1",
             query: '',
             results: [],
@@ -153,18 +153,17 @@ class Search extends Component {
             currentProgramId: "Focus, L'école de préparation mentale",
 
             my_important_json: "",
-			syncButtonVariant: "contained",
-			syncButtonColor : "secondary",
-
-
+            syncButtonVariant: "contained",
+            syncButtonColor: "secondary",
 
 
             columnDefs: [
                 //{headerName: 'id', field: 'id', sortable: true, filter: true, editable:false},
 
 
-                {headerName: 'formid',
-					field: 'formid',
+                {
+                    headerName: 'formid',
+                    field: 'formid',
 
                     // https://www.ag-grid.com/react-grid/master-detail-grids/
 
@@ -172,42 +171,50 @@ class Search extends Component {
                     cellRenderer: "agGroupCellRenderer",
 
 
-                    cellStyle: function(params) {
-                        if (params.data && params.data.historyChild == 1 ) {
+                    cellStyle: function (params) {
+                        if (params.data && params.data.historyChild == 1) {
 
                             return {color: 'green',/* backgroundColor: 'green'*/};
                         } else {
                             return {color: 'red'/*, backgroundColor: 'green'*/};
                         }
                     },
-                    minWidth : 250,
-					sortable: true, filter: true, editable: false
-				},
+                    minWidth: 250,
+                    sortable: true, filter: true, editable: false
+                },
                 {headerName: 'id', field: 'id', sortable: true, filter: true, editable: true, hide: true,},
                 {
                     headerName: 'programTitle',
                     field: 'programTitle',
 
 
-                    sortable: true, filter: true, editable: false},
-				/*
+                    sortable: true, filter: true, editable: false
+                },
+                /*
                 {headerName: 'programId', field: 'programId', sortable: true, filter: true, editable: false},
-				*/
-                {headerName: 'status',
-					field: 'state',
-					//minWidth: 100,
-					width: 100,
-					sortable: true, filter: true, editable: false},
-                {headerName: 'date conversion ', field: 'creation_date',
-					valueFormatter: function (params) {
+                */
+                /*
+                {
+                    headerName: 'status',
+                    field: 'state',
+                    //minWidth: 100,
+                    width: 100,
+                    sortable: true, filter: true, editable: false
+                },
+
+                 */
+                {
+                    headerName: 'date conversion ', field: 'creation_date',
+                    valueFormatter: function (params) {
                         var res = moment.unix(params.value).format('D MMM YYYY HH:mm');
                         //var res = moment.unix(params.value).format('YYYY-MM-DD HH:MM:SS');
 
                         return res;
-					},
+                    },
 
-					sortable: true, filter: true, editable: false},
-				/*
+                    sortable: true, filter: true, editable: false
+                },
+                /*
                 {
                     field: "Delete",
                     cellRenderer: "btnCellRenderer",
@@ -222,23 +229,23 @@ class Search extends Component {
                 },
                 */
 
-				/*{
-					headerName: 'Conversion status',
-					field: "conversionStatus",
-					cellStyle: function(params) {
-						if (params.data.conversionStatus == true) {
+                /*{
+                    headerName: 'Conversion status',
+                    field: "conversionStatus",
+                    cellStyle: function(params) {
+                        if (params.data.conversionStatus == true) {
 
-							return {color: 'green',/!* backgroundColor: 'green'*!/};
-						} else {
-							return {color: 'red'/!*, backgroundColor: 'green'*!/};
-						}
-					},
+                            return {color: 'green',/!* backgroundColor: 'green'*!/};
+                        } else {
+                            return {color: 'red'/!*, backgroundColor: 'green'*!/};
+                        }
+                    },
 
-					sortable: false, filter: false, editable: false
+                    sortable: false, filter: false, editable: false
 
-				},*/
+                },*/
                 {
-					headerName: 'Add Conversion',
+                    headerName: 'Add Conversion',
                     field: "Action",
                     cellRenderer: "btnCellRendererAction",
                     cellRendererParams: {
@@ -268,8 +275,8 @@ class Search extends Component {
                     sortable: false, filter: false, editable: false
                 },
     */
-				/*{
-					headerName: 'Conversion History',
+                /*{
+                    headerName: 'Conversion History',
                     field: "ConversionHistory",
                     cellRenderer: "BtnCellRendererHistory",
                     cellRendererParams: {
@@ -303,15 +310,23 @@ class Search extends Component {
                 // make every column use 'text' filter by default
                 filter: 'agTextColumnFilter',
                 floatingFilter: true,
-                resizable: true
+                resizable: true,
+
+                // allow every column to be aggregated
+                enableValue: true,
+                // allow every column to be grouped
+                enableRowGroup: true,
+                // allow every column to be pivoted
+                enablePivot: true,
+                sortable: true,
 
             },
 
             frameworkComponents: {
                 btnCellRenderer: BtnCellRenderer,
                 btnCellRendererAction: BtnCellRendererAction,
-				BtnCellRendererDetails: BtnCellRendererDetails,
-				BtnCellRendererHistory: BtnCellRendererHistory,
+                BtnCellRendererDetails: BtnCellRendererDetails,
+                BtnCellRendererHistory: BtnCellRendererHistory,
 
 
                 BtnCellRendererRadioGroup: BtnCellRendererRadioGroup,
@@ -319,30 +334,37 @@ class Search extends Component {
             },
             rowSelection: 'single',
 
+
+
             gridOptions: {
                 // specify which rows to expand
                 isRowMaster: params => {
                     console.log("==");
-                    if (params && params.historyChild == 1 ) {
+                    if (params && params.historyChild == 1) {
 
                         return true;
                     } else {
+
                         return false;
                     }
                 },
-            }
+
+
+
+            },
+
 
 
         }
-		this.jsontheme = "monokai";
+        this.jsontheme = "monokai";
         this.error = "";
         this.getDBContent = this.getDBContent.bind(this);
         this.clickedRemove = this.clickedRemove.bind(this);
         this.onClickedAction = this.onClickedAction.bind(this);
-		//this.onClickedDetail = this.onClickedDetail.bind(this);
-		//this.onClickedHistory = this.onClickedHistory.bind(this);
+        //this.onClickedDetail = this.onClickedDetail.bind(this);
+        //this.onClickedHistory = this.onClickedHistory.bind(this);
 
-		this.onCellClicked = this.onCellClicked.bind(this);
+        this.onCellClicked = this.onCellClicked.bind(this);
 
         /*this.clickedChoice = this.clickedChoice.bind(this);*/
         this.onModalDeleteResult = this.onModalDeleteResult.bind(this)
@@ -351,16 +373,84 @@ class Search extends Component {
         this.onFormSubmit = this.onFormSubmit.bind(this);
         this.synchronizeDBContent = this.synchronizeDBContent.bind(this);
         this.handleSelectDropDown = this.handleSelectDropDown.bind(this);
-		this.getDetailRowData = this.getDetailRowData.bind(this);
+        this.getDetailRowData = this.getDetailRowData.bind(this);
 
-
-
+        this.onChangeConversionType = this.onChangeConversionType.bind(this);
+        this.onChangeAreaJSON = this.onChangeAreaJSON.bind(this);
+        this.filterRowByGroup = this.filterRowByGroup.bind(this);
 
 
     }
+    onChangeAreaJSON(event){
+        console.log("teste");
+        if (event && event.target && event.target.name) {
+            this.setState({[event.target.name]: event.target.checked});
+        }
 
-    getDetailRowData  (params) {
-        params.successCallback( tt );
+    }
+    filterRowByGroup( status ){
+        var that = this;
+        if ( status == true){
+            // On redessine en supprimant
+            this.state.gridOptions.api.forEachNode(function (rowNode) {
+                console.log("delete")
+
+                var selectedData = rowNode.data
+                if (selectedData.historyChild == 0) {
+                    var res = that.state.gridOptions.api.applyTransaction({remove: [selectedData]});
+                }
+
+
+            });
+            this.setState({ checkedB: status   }, () => {
+
+
+            })
+
+        }else{
+            // Onn remet tout
+            this.setState({progressbar: true, checkedB: status   }, () => {
+                this.getDBContent();
+                this.gridApi.setRowData(this.state.results);
+
+            })
+
+        }
+
+    }
+
+    onChangeConversionType(event) {
+        var that = this;
+        if (event && event.target && event.target.name) {
+
+            this.filterRowByGroup(event.target.checked)
+
+            /*if (event.target.checked == true) {
+                this.setState({[event.target.name]: event.target.checked});
+                this.state.gridOptions.api.forEachNode(function (rowNode) {
+                    console.log("delete")
+
+                    var selectedData = rowNode.data
+                    if (selectedData.historyChild == 0) {
+                        var res = that.state.gridOptions.api.applyTransaction({remove: [selectedData]});
+                    }
+
+
+                });
+            } else {
+                this.setState({progressbar: true, [event.target.name]: event.target.checked}, () => {
+                    that.getDBContent();
+                    that.gridApi.setRowData(that.state.results);
+
+                })
+            }
+*/
+        }
+
+    }
+
+    getDetailRowData(params) {
+        params.successCallback(tt);
 
         //setTimeout(function() {  params.api.refreshView(  );; }, 0)
 
@@ -368,142 +458,140 @@ class Search extends Component {
     }
 
     componentDidMount() {
-		this.setState({progressbar: true}, () => {
-			this.synchronizeDBContent();
-			//this.getDBContent();
-		})
+        this.setState({progressbar: true}, () => {
+            this.synchronizeDBContent();
+            //this.getDBContent();
+        })
 
     }
-    handleSelectDropDown(e){
+
+    handleSelectDropDown(e) {
         console.log("handleSelectDropDown");
     }
 
-/*    clickedChoice(data) {
-        console.log("clickedChoice data:" + JSON.stringify(data));
+    /*    clickedChoice(data) {
+            console.log("clickedChoice data:" + JSON.stringify(data));
 
+        }*/
+
+
+    onCellClicked(data) {
+
+        if (data &&
+            data.colDef.field === "Details" ||
+            data.colDef.field === "Delete" ||
+            data.colDef.field === "Action" ||
+            data.colDef.field === "ConversionHistory"
+
+        ) {
+
+        } else {
+
+            console.log("onCellClicked");
+            this.jsontheme = "monokai"
+
+            if (data && data.data && data.data.affilae_data) {
+
+                var str = JSON.parse(data.data.affilae_data);
+                this.setState({currentSelection: data, my_important_json: str})
+            }
+        }
+    }
+
+
+    /*onClickedHistory(data) {
+        console.log("onClickedHistory");
+        this.mycurrent.setState({progressbar: true}, () => {
+            var session_url = `${API_URL}/historyconversion?api_key=${API_KEY}`;
+            var username = 'jpl';
+            var password = 'jpl';
+
+            var auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+            var config = {
+                method: 'POST',
+                withCredentials: true,
+                "headers": {
+                    "Authorization": auth,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+
+            };
+            var that = this;
+            fetch( session_url, config
+                ).then((res) => {
+
+                    if (res.ok) {
+                        //that.ErrorInfo = {}
+                    } else {
+                        //that.ErrorInfo = {status: res.status, url: res.url, statusText: res.statusText}
+                    }
+                    var p = res.json();
+                    return p;
+                }).then(function (data) {
+
+
+
+
+                        //that.setState({my_important_json: data})
+                        if (data && data.results) {
+                            //var str = JSON.parse(data.results);
+                            var str = [];
+
+                            for ( var i=0; i<data.results.length; i++ ){
+                                var blk = data.results[i];
+                                if ( blk.affilae_conversion ){
+                                    blk.affilae_conversion = JSON.parse(data.results[i].affilae_conversion);
+                                }
+                                str.push( blk )
+                            }
+                             that.mycurrent.jsontheme = "apathy:inverted";
+                            that.mycurrent.setState({
+                                progressbar: false,
+
+                                my_important_json: str,
+
+
+                            })
+                        }
+
+
+
+                }).catch(function (error) {
+                    console.log('Error on historyconversion');
+
+                    that.mycurrent.error = {};
+                    that.mycurrent.error.severity = "error";
+                    that.mycurrent.error.msg = error.message;
+                    that.mycurrent.setState({progressbar: false}, () => {
+
+                    })
+
+
+            });
+        })
     }*/
 
-
-	onCellClicked(data) {
-
-		if ( data &&
-			 data.colDef.field === "Details" ||
-			 data.colDef.field === "Delete" ||
-			 data.colDef.field === "Action" ||
-			 data.colDef.field === "ConversionHistory"
-
-		){
-
-		}else{
-
-			console.log("onCellClicked");
-			this.jsontheme = "monokai"
-
-		   if ( data && data.data  && data.data.affilae_data ){
-
-			   var str = JSON.parse(data.data.affilae_data);
-			   this.setState({  currentSelection: data, my_important_json: str})
-		   }
-		}
-	}
+    /*onClickedDetail(data) {
+        console.log("onClickedDetail");
+        if ( data && data.affilae_conversion ){
+            this.mycurrent.jsontheme = "shapeshifter:inverted";
 
 
-	/*onClickedHistory(data) {
-		console.log("onClickedHistory");
-		this.mycurrent.setState({progressbar: true}, () => {
-			var session_url = `${API_URL}/historyconversion?api_key=${API_KEY}`;
-			var username = 'jpl';
-			var password = 'jpl';
-
-			var auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
-			var config = {
-				method: 'POST',
-				withCredentials: true,
-				"headers": {
-					"Authorization": auth,
-					"Content-Type": "application/json"
-				},
-				body: JSON.stringify(data)
-
-			};
-			var that = this;
-			fetch( session_url, config
-				).then((res) => {
-
-					if (res.ok) {
-						//that.ErrorInfo = {}
-					} else {
-						//that.ErrorInfo = {status: res.status, url: res.url, statusText: res.statusText}
-					}
-					var p = res.json();
-					return p;
-				}).then(function (data) {
-
-
-
-
-						//that.setState({my_important_json: data})
-						if (data && data.results) {
-							//var str = JSON.parse(data.results);
-							var str = [];
-
-							for ( var i=0; i<data.results.length; i++ ){
-								var blk = data.results[i];
-								if ( blk.affilae_conversion ){
-									blk.affilae_conversion = JSON.parse(data.results[i].affilae_conversion);
-								}
-								str.push( blk )
-							}
-							 that.mycurrent.jsontheme = "apathy:inverted";
-							that.mycurrent.setState({
-								progressbar: false,
-
-								my_important_json: str,
-
-
-							})
-						}
-
-
-
-				}).catch(function (error) {
-					console.log('Error on historyconversion');
-
-					that.mycurrent.error = {};
-					that.mycurrent.error.severity = "error";
-					that.mycurrent.error.msg = error.message;
-					that.mycurrent.setState({progressbar: false}, () => {
-
-					})
-
-
-			});
-		})
-	}*/
-
-	/*onClickedDetail(data) {
-		console.log("onClickedDetail");
-		if ( data && data.affilae_conversion ){
-		    this.mycurrent.jsontheme = "shapeshifter:inverted";
-
-
-			var str = JSON.parse(data.affilae_conversion);
-			this.mycurrent.setState({  currentSelection: data, my_important_json: str})
-		}
-	}*/
+            var str = JSON.parse(data.affilae_conversion);
+            this.mycurrent.setState({  currentSelection: data, my_important_json: str})
+        }
+    }*/
 
     onClickedAction(data) {
-		console.log("onClickedAction");
-		if ( data && data.affilae_data ){
+        console.log("onClickedAction");
+        if (data && data.affilae_data) {
 
-			var str = JSON.parse(data.affilae_data);
-			this.mycurrent.setState({show: true, currentSelection: data, my_important_json: str})
-		}else{
-			 this.mycurrent.setState({show: true, currentSelection: data })
-		}
-
-
-
+            var str = JSON.parse(data.affilae_data);
+            this.mycurrent.setState({show: true, currentSelection: data, my_important_json: str})
+        } else {
+            this.mycurrent.setState({show: true, currentSelection: data})
+        }
 
 
     }
@@ -516,8 +604,6 @@ class Search extends Component {
         //var currentChoice = this.mycurrent.state.choice;
 
 
-
-
         var session_url = `${API_URL}/addconversion?api_key=${API_KEY}`;
         var username = 'jpl';
         var password = 'jpl';
@@ -527,14 +613,14 @@ class Search extends Component {
             method: 'POST',
             withCredentials: true,
             "headers": {
-                "Authorization": auth,
+                //"Authorization": auth,
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(data)
 
         };
         var that = this;
-        fetch( session_url, config )
+        fetch(session_url, config)
             .then(response => response.json())
 
             .then(function (data) {
@@ -543,11 +629,11 @@ class Search extends Component {
                     //that.setState({my_important_json: data})
                     if (data && data.status && data.status === "done") {
                         // TODO
-						that.error = {};
+                        that.error = {};
                         that.error.severity = "info";
                         that.error.msg = "status: " + data.status + " msg: " + data.message;
-					} else	if (data && data.status ) {
-						that.error = {};
+                    } else if (data && data.status) {
+                        that.error = {};
                         that.error.severity = "error";
                         that.error.msg = "status: " + data.status + " msg: " + data.message;
                     } else {
@@ -562,7 +648,7 @@ class Search extends Component {
             }).catch(function (error) {
             console.log('Error on action');
             that.setState({progressbar: false}, () => {
-                alert ("Error on action: Action Call failed:" + error)
+                alert("Error on action: Action Call failed:" + error)
             })
 
         });
@@ -620,117 +706,119 @@ class Search extends Component {
         this.getDBContent()
 
     }
+
     synchronizeDBContent() {
         console.log("synchronize required");
-		this.setState({progressbar: true}, () => {
-			var session_url = `${API_URL}/synchronize?api_key=${API_KEY}`;
-			var username = 'jpl';
-			var password = 'jpl';
+        this.setState({progressbar: true}, () => {
+            var session_url = `${API_URL}/synchronize?api_key=${API_KEY}`;
+            var username = 'jpl';
+            var password = 'jpl';
 
-			var data = {};
-			data.program = {};
-			data.program.title = this.state.currentProgramId;
-			data.limit = 20;
+            var data = {};
+            data.program = {};
+            data.program.title = this.state.currentProgramId;
+            data.limit = 20;
 
-			var auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+            var auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
-			var config = {
-				method: 'POST',
-				withCredentials: true,
-				"headers": {
-					"Authorization": auth,
-					"Content-Type": "application/json"
-				},
-				body: JSON.stringify(data)
-			};
-			var that = this;
-			fetch(session_url, config
-				//axios.get(session_url, config
-			).then((res) => {
+            var config = {
+                method: 'POST',
+                withCredentials: true,
+                "headers": {
+                    //"Authorization": auth,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            };
+            var that = this;
+            fetch(session_url, config
+                //axios.get(session_url, config
+            ).then((res) => {
 
-				if (res.ok) {
-					//that.ErrorInfo = {}
-				} else {
-					//that.ErrorInfo = {status: res.status, url: res.url, statusText: res.statusText}
-				}
-				var p = res.json();
-				return p;
-			})
-				.then(function (data) {
+                if (res.ok) {
+                    //that.ErrorInfo = {}
+                } else {
+                    //that.ErrorInfo = {status: res.status, url: res.url, statusText: res.statusText}
+                }
+                var p = res.json();
+                return p;
+            })
+                .then(function (data) {
 
-					console.log('Synchronize Authenticated');
-					that.error = {};
-					that.error.severity = "info";
-					that.error.msg = JSON.stringify(data);
-					that.setState({
-						progressbar: false}, () => {
+                    console.log('Synchronize Authenticated');
+                    that.error = {};
+                    that.error.severity = "info";
+                    that.error.msg = JSON.stringify(data);
+                    that.setState({
+                        progressbar: false
+                    }, () => {
 
-						that.getDBContent();
+                        that.getDBContent();
 
-					})
-				}).catch(function (error) {
-					console.log('Synchronize Error: ' + error.message);
-					that.error = {};
-					that.error.severity = "error";
-					that.error.msg = error.message;
-					that.setState({
-						progressbar: false,
+                    })
+                }).catch(function (error) {
+                console.log('Synchronize Error: ' + error.message);
+                that.error = {};
+                that.error.severity = "error";
+                that.error.msg = error.message;
+                that.setState({
+                    progressbar: false,
 
 
-					})
-			});
-		})
+                })
+            });
+        })
     }
 
     getDBContent() {
 
-			var session_url = `${API_URL}/fetch?api_key=${API_KEY}&prefix=${this.state.query}&limit=7`;
-			var username = 'jpl';
-			var password = 'jpl';
+        var session_url = `${API_URL}/fetch?api_key=${API_KEY}&prefix=${this.state.query}&limit=7`;
+        var username = 'jpl';
+        var password = 'jpl';
 
-			var auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
-			var config = {
-				withCredentials: true,
-				"headers": {
-					"Authorization": auth
-				}
-			};
-			var that = this;
-			fetch(session_url, config
-				//axios.get(session_url, config
-			).then((res) => {
+        var auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+        var config = {
+            withCredentials: true,
+            "headers": {
+                //"Authorization": auth
+            }
+        };
+        var that = this;
+        fetch(session_url, config
+            //axios.get(session_url, config
+        ).then((res) => {
 
-				if (res.ok) {
-					//that.ErrorInfo = {}
-				} else {
-					//that.ErrorInfo = {status: res.status, url: res.url, statusText: res.statusText}
-				}
-				var p = res.json();
-				return p;
-			})
-				.then(function (data) {
+            if (res.ok) {
+                //that.ErrorInfo = {}
+            } else {
+                //that.ErrorInfo = {status: res.status, url: res.url, statusText: res.statusText}
+            }
+            var p = res.json();
+            return p;
+        })
+            .then(function (data) {
 
-					console.log('Fetch Authenticated');
+                console.log('Fetch Authenticated');
 
-					that.checkRuleConversionPossibility(data.results);
+                that.checkRuleConversionPossibility(data.results);
 
-					that.setState({
-						progressbar: false,
-						results: data.results // MusicGraph returns an object named data,
-						// as does axios. So... data.data
-					})
+                that.setState({
+                    progressbar: false,
+                    results: data.results // MusicGraph returns an object named data,
+                    // as does axios. So... data.data
+                })
 
-				}).catch(function (error) {
-					console.log('Fetch Error: ' + error.message);
-					that.error = {};
-					that.error.severity = "error";
-					that.error.msg = error.message;
-					that.setState({
-						progressbar: false,
-						test: "jpl2",
+            }).catch(function (error) {
+            console.log('Fetch Error: ' + error.message);
+            that.error = {};
+            that.error.severity = "error";
+            that.error.msg = error.message;
+            that.setState({
+                progressbar: false,
+                test: "jpl2",
 
-					})
-			});
+            })
+        });
 
     }
 
@@ -743,7 +831,7 @@ class Search extends Component {
         var config = {
             withCredentials: true,
             "headers": {
-                "Authorization": auth
+                //"Authorization": auth
             }
         };
         var that = this;
@@ -765,37 +853,41 @@ class Search extends Component {
                 console.log('Delete: block deleted');
 
             }).catch(function (error) {
-                console.log('Delete Error: ' + error.message);
-                that.error = {};
-                that.error.severity = "error";
-                that.error.msg = error.message;
-                that.setState({
-                    test: "jpl2",
+            console.log('Delete Error: ' + error.message);
+            that.error = {};
+            that.error.severity = "error";
+            that.error.msg = error.message;
+            that.setState({
+                test: "jpl2",
 
-                })
+            })
         });
     }
 
- /*
-    onSelectionChanged = (e) => {
-        var selectedRows = this.gridApi.getSelectedRows();
-        document.querySelector('#selectedRows').innerHTML = selectedRows.length === 1 ? selectedRows[0].id : '';
-        var str = "";
-        if ( selectedRows && selectedRows[0] && selectedRows[0].affilae_data) {
-            str = JSON.parse(selectedRows[0].affilae_data);
-        }
-	    console.log("==>onSelectionChanged str: " + str);
-        this.setState({my_important_json: str})
-    };
-	*/
+    /*
+       onSelectionChanged = (e) => {
+           var selectedRows = this.gridApi.getSelectedRows();
+           document.querySelector('#selectedRows').innerHTML = selectedRows.length === 1 ? selectedRows[0].id : '';
+           var str = "";
+           if ( selectedRows && selectedRows[0] && selectedRows[0].affilae_data) {
+               str = JSON.parse(selectedRows[0].affilae_data);
+           }
+           console.log("==>onSelectionChanged str: " + str);
+           this.setState({my_important_json: str})
+       };
+       */
     onGridReady = (params) => {
         this.gridApi = params.api;
         this.gridColumnApi = params.columnApi;
 
         //this.state.detailCellRendererParams.detailGridOptions.api = params.api;
         console.log("onGridReady")
+
+
+
         //this.setState ({detailCellRendererParams:{detailGridOptions: {api : params.api}}});
     }
+
 
 
     handleSubmitCreateUuid(event) {
@@ -813,7 +905,7 @@ class Search extends Component {
             method: 'POST',
             withCredentials: true,
             "headers": {
-                "Authorization": auth,
+                //"Authorization": auth,
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(data)
@@ -838,15 +930,15 @@ class Search extends Component {
                 that.getDBContent();
 
             }).catch(function (error) {
-                console.log('Add Error: ' + error.message);
-                that.error = {};
-                that.error.severity = "error";
-                that.error.msg = error.message;
-                that.setState({
-                    test: "jpl2",
+            console.log('Add Error: ' + error.message);
+            that.error = {};
+            that.error.severity = "error";
+            that.error.msg = error.message;
+            that.setState({
+                test: "jpl2",
 
-                })
-            });
+            })
+        });
 
 
         event.preventDefault();
@@ -862,16 +954,16 @@ class Search extends Component {
 
         var commission = "";
         var amount = 0;
-		var prefix = "";
+        var prefix = "";
 
-        for ( var i=0; i<data.target.length; i ++ ){
+        for (var i = 0; i < data.target.length; i++) {
 
-            if ( data.target[i].id === "action_commission"){
+            if (data.target[i].id === "action_commission") {
                 commission = data.target[i].value
-            }else if ( data.target[i].id === "action_amount"){
+            } else if (data.target[i].id === "action_amount") {
                 amount = data.target[i].value;
 
-			}else if ( data.target[i].id === "action_prefix"){
+            } else if (data.target[i].id === "action_prefix") {
                 prefix = data.target[i].value
 
             }
@@ -886,89 +978,129 @@ class Search extends Component {
         dataInput.choice = this.state.choice;
         dataInput.formId = this.state.currentSelection.formid;
         dataInput.previousrequest = this.state.currentSelection;
-		if ( this.state.currentSelection.programId ){
-			dataInput.programId = this.state.currentSelection.programId;
-		}
-		if ( this.state.currentSelection.partnership_id ){
-			dataInput.partnership_id = this.state.currentSelection.partnership_id;
-		}
-		if ( this.state.currentSelection.rule_Id ){
-			dataInput.rule_Id = this.state.currentSelection.rule_Id;
-		}
-		dataInput.prefix = prefix;
+        if (this.state.currentSelection.programId) {
+            dataInput.programId = this.state.currentSelection.programId;
+        }
+        if (this.state.currentSelection.partnership_id) {
+            dataInput.partnership_id = this.state.currentSelection.partnership_id;
+        }
+        if (this.state.currentSelection.rule_Id) {
+            dataInput.rule_Id = this.state.currentSelection.rule_Id;
+        }
+        dataInput.prefix = prefix;
         data.preventDefault();
 
-        this.setState({show: false, progressbar: true},() => {
-            this.executeAddAffilaeRequest( dataInput )
+        this.setState({show: false, progressbar: true}, () => {
+            this.executeAddAffilaeRequest(dataInput)
         })
 
 
+    }
 
+    checkRuleConversionPossibility(result) {
+
+        for (var j = 0; j < result.length; j++) {
+
+            if (result[j] && result[j].affilae_data) {
+
+
+                var dataline = JSON.parse(result[j].affilae_data);
+                var partnership_id = "";
+                if (dataline && dataline.funnel) {
+                    var localfunnel = dataline.funnel;
+                    var partnership_id_status = false;
+                    for (var i = 0; i < localfunnel.length; i++) {
+                        if (localfunnel[i] && localfunnel[i].partnership) {
+
+                            if (localfunnel[i].percent && localfunnel[i].percent === 100) {
+
+                                if (localfunnel[i].partnership.id) {
+                                    partnership_id = localfunnel[i].partnership.id;
+                                    console.log("partnership_id trouvé: " + partnership_id);
+                                    partnership_id_status = true;
+                                }
+                            }
+
+                        }
+
+                    }
+                    if (partnership_id_status === false) {
+                        // pas de pourcent 100 found
+                        partnership_id = "pas de pourcent 100% trouve"
+                        result[j].conversionStatus = false;
+                        console.log("partnership_id pas trouvé: " + partnership_id);
+                    } else {
+                        result[j].conversionStatus = true;
+                    }
+
+                }
+                console.log("partnership_id: " + partnership_id);
+            }
+        }
 
     }
-	checkRuleConversionPossibility( result ){
-
-		for ( var j=0; j<result.length; j ++ ){
-
-			if ( result[j] && result[j].affilae_data ){
-
-
-
-				var dataline = JSON.parse(result[j].affilae_data);
-				var partnership_id = "";
-				if (dataline && dataline.funnel) {
-					var localfunnel = dataline.funnel;
-					var partnership_id_status = false;
-					for (var i = 0; i < localfunnel.length; i++) {
-						if (localfunnel[i] && localfunnel[i].partnership) {
-
-							if (localfunnel[i].percent && localfunnel[i].percent === 100) {
-
-								if (localfunnel[i].partnership.id) {
-									partnership_id = localfunnel[i].partnership.id;
-									console.log("partnership_id trouvé: " + partnership_id);
-									partnership_id_status = true;
-								}
-							}
-
-						}
-
-					}
-					if ( partnership_id_status === false ){
-						// pas de pourcent 100 found
-						partnership_id = "pas de pourcent 100% trouve"
-						result[j].conversionStatus = false;
-						console.log("partnership_id pas trouvé: " + partnership_id);
-					}else{
-						result[j].conversionStatus = true;
-					}
-
-				}
-				console.log("partnership_id: " + partnership_id);
-			}
-		}
-
-	}
 
 
     render() {
         const {classes} = this.props;
 
-		const jsontheme = this.jsontheme;
+        const jsontheme = this.jsontheme;
+
 
         const progressBar = [];
         if (this.state.progressbar === true) {
             progressBar.push(<div>
-                    <CircularProgress size={100} className={classes.fabProgress} ref= {this.refProgressBar}/>
+                    <CircularProgress size={100} className={classes.fabProgress} ref={this.refProgressBar}/>
                 </div>
             );
         }
 
         const RefreshButton = [];
-		var variant = this.syncButtonVariant;
-		var color = this.syncButtonColor;
+        var variant = this.syncButtonVariant;
+        var color = this.syncButtonColor;
         RefreshButton.push(
-            <Button   variant={variant} color={color} onClick={() => { this.synchronizeDBContent() }}>Synchronize</Button>
+            <Button variant={variant} color={color} onClick={() => {
+                this.synchronizeDBContent()
+            }}>Synchronize</Button>
+        );
+
+        const FilterDataButton = [];
+        var variant = this.syncButtonVariant;
+        var color = this.syncButtonColor;
+        FilterDataButton.push(
+            //<Button   variant={"contained"} color={"primary"}  size="small" onClick={() => { this.onChangeConversionType() }}>only group</Button>
+            <FormControlLabel
+                control={
+                    <Checkbox
+                        checked={this.state.checkedB}
+                        color="primary"
+                        name="checkedB"
+                        onChange={this.onChangeConversionType}
+                        inputProps={{'aria-label': 'secondary checkbox'}}
+                        only group
+                    />
+                }
+                label="only group"
+            />
+        );
+
+        const AreaJSONData = [];
+
+        AreaJSONData.push(
+            //<Button   variant={"contained"} color={"primary"}  size="small" onClick={() => { this.onChangeConversionType() }}>only group</Button>
+            <FormControlLabel
+                control={
+                    <Checkbox
+                        checked={this.state.areaJSONDataStatus}
+                        color="primary"
+                        name="areaJSONDataStatus"
+                        onChange={this.onChangeAreaJSON}
+                        inputProps={{'aria-label': 'secondary checkbox'}}
+
+                    />
+                }
+                label="json area"
+            />
         );
 
         const ProgramDropdown = [];
@@ -981,10 +1113,10 @@ class Search extends Component {
                     id="dropdown-menu-align-right"
                     onSelect={this.handleSelectDropDown}
                 >
-                <Dropdown.Item>
-                    <Dropdown.Item href="#/action-1">"Focus, L'école de préparation mentale"</Dropdown.Item>
+                    <Dropdown.Item>
+                        <Dropdown.Item href="#/action-1">"Focus, L'école de préparation mentale"</Dropdown.Item>
 
-                </Dropdown.Item>
+                    </Dropdown.Item>
 
                 </DropdownButton>
 
@@ -993,31 +1125,31 @@ class Search extends Component {
 
 
         const AlertBlk = [];
-        if ( this.error && this.error.severity ){
-            if ( this.error.severity === "error" || this.error.severity === "abort" || this.error.severity === "failed"){
+        if (this.error && this.error.severity) {
+            if (this.error.severity === "error" || this.error.severity === "abort" || this.error.severity === "failed") {
 
                 AlertBlk.push(
                     <div className={classes.root}>
-                                    <Alert severity={this.error.severity}  className={classes.root}>
-                                        <AlertTitle>Error</AlertTitle>
-                                        {this.error.msg}
-                                        action={
-                                        <IconButton
-                                            aria-label="close"
-                                            color="inherit"
-                                            size="small"
-                                            onClick={() => {
-                                                this.setState({errorPanel:false});
-                                            }}
-                                        >
-                                            <CloseIcon fontSize="inherit" />
-                                        </IconButton>
-                                    }
-                                    </Alert>
+                        <Alert severity={this.error.severity} className={classes.root}>
+                            <AlertTitle>Error</AlertTitle>
+                            {this.error.msg}
+                            action={
+                            <IconButton
+                                aria-label="close"
+                                color="inherit"
+                                size="small"
+                                onClick={() => {
+                                    this.setState({errorPanel: false});
+                                }}
+                            >
+                                <CloseIcon fontSize="inherit"/>
+                            </IconButton>
+                        }
+                        </Alert>
                     </div>
-                             );
+                );
 
-            }else if ( this.error.severity === "info" ){
+            } else if (this.error.severity === "info") {
                 AlertBlk.push(
                     <Alert severity="info">
                         <AlertTitle>Info</AlertTitle>
@@ -1027,18 +1159,15 @@ class Search extends Component {
             }
             this.error = {};
         }
-		const SettingsForm = [];
+        const SettingsForm = [];
 
 
+        SettingsForm.push(
+
+        );
 
 
-		SettingsForm.push(
-
-					);
-
-
-
-		const CreateForm = [];
+        const CreateForm = [];
         CreateForm.push(
             <form onSubmit={this.handleSubmitCreateUuid}>
                 <h1>Create UUID Formulaire </h1>
@@ -1084,7 +1213,6 @@ class Search extends Component {
             <form>
 
 
-
                 { /*
 
                 <div className="example-header">
@@ -1098,48 +1226,59 @@ class Search extends Component {
                             ColumnsToolPanelModule,
 
 					*/}
-				<div style={{  width: "100%" }}>
-                <div className="ag-theme-alpine" >
-                    <AgGridReact
-                        //modules= {[AllModules]}
-                        modules={[AllCommunityModules,MasterDetailModule,
-                            MenuModule,
+                <div style={{width: "100%"}}>
+                    <div className="ag-theme-alpine">
+                        <AgGridReact
+                            //modules= {[AllModules]}
+                            modules={[AllCommunityModules, MasterDetailModule,
+                                MenuModule,
 
 
-                        ]}
+                            ]}
 
-                        masterDetail={this.masterDetail}
+                            masterDetail={this.masterDetail}
 
-                        columnDefs={this.state.columnDefs}
-                        detailCellRenderer={'myDetailCellRenderer'}
-                        //detailCellRendererParams = {this.detailCellRendererParams}
-                        pagination="true"
-                        domLayout='autoHeight'
-                        //ref={this.state.childRefBlockContent}
-                        //columnDefs={this.state.columnDefs}
-                        defaultColDef={this.state.defaultColDef}
-                        rowMultiSelectWithClick={true}
-                        onGridReady={this.onGridReady}
-                        rowSelection={this.state.rowSelection}
-						onCellClicked={this.onCellClicked}
-                        rowData={this.state.results} paginationPageSize="10"
-                        //onSelectionChanged={this.onSelectionChanged}
-                        frameworkComponents={this.state.frameworkComponents}
-                        enableRangeSelection={true}
-                        allowContextMenuWithControlKey={true}
-                        gridOptions={this.state.gridOptions}
-                        //getContextMenuItems={this.getContextMenuItems}
+                            columnDefs={this.state.columnDefs}
+                            detailCellRenderer={'myDetailCellRenderer'}
+                            //detailCellRendererParams = {this.detailCellRendererParams}
+                            pagination="true"
+                            domLayout='autoHeight'
+                            //ref={this.state.childRefBlockContent}
+                            //columnDefs={this.state.columnDefs}
+                            defaultColDef={this.state.defaultColDef}
+                            rowMultiSelectWithClick={true}
+                            onGridReady={this.onGridReady}
 
-                    >
+                            rowSelection={this.state.rowSelection}
+                            onCellClicked={this.onCellClicked}
+                            rowData={this.state.results} paginationPageSize="10"
+                            //onSelectionChanged={this.onSelectionChanged}
+                            frameworkComponents={this.state.frameworkComponents}
+                            enableRangeSelection={true}
+                            allowContextMenuWithControlKey={true}
+                            gridOptions={this.state.gridOptions}
+                            //getContextMenuItems={this.getContextMenuItems}
+                            sideBar={this.state.sideBar}
+
+                        >
 
 
-                    </AgGridReact>
+                        </AgGridReact>
 
+                    </div>
                 </div>
-				</div>
 
             </form>
         )
+
+        const ControlledJSONAreaTabs = [];
+        if (this.state.areaJSONDataStatus == true) {
+
+
+            ControlledJSONAreaTabs.push(
+                <ReactJson src={this.state.my_important_json} theme={jsontheme}/>
+            )
+        }
 
         const ControlledTabs = [];
 
@@ -1147,45 +1286,49 @@ class Search extends Component {
 
         ControlledTabs.push(
             <div>
-            <Grid container
-                  direction="row"
-                  justify="flex-end"
-                  alignItems="center" spacing={2}>
+                <Grid container
+                      direction="row"
+                      justify="flex-end"
+                      alignItems="center" spacing={2}>
 
 
-            </Grid>
-            <Tabs>
-                <TabList>
-                    <Tab>View</Tab>
+                </Grid>
+                <Tabs>
+                    <TabList>
+                        <Tab>View</Tab>
 
-					<Tab>Settings</Tab>
+                        <Tab>Settings</Tab>
 
-                </TabList>
-
-
-                <TabPanel>
-                    <h1>FormId list in DB </h1>
-                    <Grid container
-                          direction="row"
-                          justify="flex-end"
-                          alignItems="center" spacing={2}>
+                    </TabList>
 
 
-                    </Grid>
-                    {ViewForm}
-                    <ReactJson src={this.state.my_important_json} theme={jsontheme}/>
-                </TabPanel>
+                    <TabPanel>
+                        <h1>FormId list in DB </h1>
+                        <Grid container
+                              direction="row"
+                              justify="flex-end"
+                              alignItems="center" spacing={2}>
 
-				<TabPanel>
 
-                    {ProgramDropdown}
-					{RefreshButton}
-                </TabPanel>
-            </Tabs>
+                        </Grid>
+                        {FilterDataButton}
+                        {ViewForm}
+                        {ControlledJSONAreaTabs}
+
+                    </TabPanel>
+
+                    <TabPanel>
+
+                        {ProgramDropdown}
+                        {RefreshButton}
+                        {AreaJSONData}
+
+                    </TabPanel>
+                </Tabs>
             </div>
         );
-		console.log( "this.state.my_important_json:" + this.state.my_important_json )
-		console.log( "this.state.currentSelection:" + this.state.currentSelection )
+        console.log("this.state.my_important_json:" + this.state.my_important_json)
+        console.log("this.state.currentSelection:" + this.state.currentSelection)
 
 
         return (
@@ -1212,7 +1355,8 @@ class Search extends Component {
                     <Modal.Body>
 
                     </Modal.Body>
-                    <ActionForm dataline={this.state.my_important_json} formId={this.state.currentSelection} onSubmit={this.onFormSubmit}/>
+                    <ActionForm dataline={this.state.my_important_json} formId={this.state.currentSelection}
+                                onSubmit={this.onFormSubmit}/>
                     <Modal.Footer>
                         <Button variant="secondary" onClick={this.handleModalClose}>
                             Close
@@ -1227,4 +1371,4 @@ class Search extends Component {
     }
 }
 
-export default withStyles(styles, {withTheme: true}) (Search);
+export default withStyles(styles, {withTheme: true})(Search);

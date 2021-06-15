@@ -117,7 +117,7 @@ class DetailCellRenderer extends Component {
                 method: 'POST',
                 withCredentials: true,
                 "headers": {
-                    "Authorization": auth,
+                    //"Authorization": auth,
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(this.props.data)
