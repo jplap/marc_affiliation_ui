@@ -24,13 +24,14 @@ function App() {
             </a>
           </header>
         </div>*/
-        <div>
-            <section>
+        <div className="AppFocus">
+
                 <Search></Search>
 
 
-            </section>
         </div>
+
+
     );
 }
 

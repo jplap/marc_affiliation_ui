@@ -1,14 +1,12 @@
 import React, {Component} from 'react'
-import {Modal} from "react-bootstrap";
+import {Col, Modal, Row} from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ReactJson from 'react-json-view'
 
-
 import IconButton from '@material-ui/core/IconButton';
 //import Collapse from '@material-ui/core/Collapse';
-
 import CloseIcon from '@material-ui/icons/Close';
-import {AgGridReact, AgGridColumn} from 'ag-grid-react';
+import {AgGridReact} from 'ag-grid-react';
 import BtnCellRenderer from "./BtnCellRenderer";
 import BtnCellRendererAction from "./BtnCellRendererAction";
 import BtnCellRendererDetails from "./BtnCellRendererDetails";
@@ -22,17 +20,21 @@ import Grid from "@material-ui/core/Grid";
 import Box from '@material-ui/core/Box';
 import {Alert, AlertTitle} from '@material-ui/lab';
 
-import {ClientSideRowModelModule} from '@ag-grid-community/client-side-row-model';
+
 import {MasterDetailModule} from '@ag-grid-enterprise/master-detail';
 import {MenuModule} from '@ag-grid-enterprise/menu';
-import {ColumnsToolPanelModule} from '@ag-grid-enterprise/column-tool-panel';
+
 import '@ag-grid-community/core/dist/styles/ag-grid.css';
 import '@ag-grid-community/core/dist/styles/ag-theme-alpine.css';
-import {AllModules} from "@ag-grid-enterprise/all-modules";
+//import {AllModules} from "@ag-grid-enterprise/all-modules";
 import {AllCommunityModules} from '@ag-grid-community/all-modules';
 
 import DetailCellRenderer from './DetailCellRenderer.js';
 
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
+import Input from '@material-ui/core/Input';
+import InputAdornment from '@material-ui/core/InputAdornment';
 
 //import RadioGroup from "@material-ui/core/RadioGroup";
 //import FormControlLabel from "@material-ui/core/FormControlLabel";
@@ -44,10 +46,8 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import ActionForm from './ActionForm';
 //import Chip from '@material-ui/core/Chip';
-
 //import {TextareaAutosize} from "@material-ui/core";
-
-import {Tab, Tabs, TabList, TabPanel} from 'react-tabs';
+import {Tab, TabList, TabPanel, Tabs} from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 
 import './Search.css';
@@ -67,11 +67,6 @@ const {API_KEY} = process.env
 //const API_URL = 'https://localhost:8686/form/suggest'
 const API_URL = '/service/backend/form'
 
-var tt = [{
-    "name": "susan",
-    "callId": 555,
-    "duration": 72
-}]
 
 
 const styles = theme => ({
@@ -139,11 +134,13 @@ class Search extends Component {
                     };
 
         */
+        this.paginationPageSizeDefault = 20;
 
 
         this.state = {
             checkedB: false,
             areaJSONDataStatus : false,
+            paginationCB: true,
 
             test: "jpl1",
             query: '',
@@ -155,11 +152,20 @@ class Search extends Component {
             my_important_json: "",
             syncButtonVariant: "contained",
             syncButtonColor: "secondary",
-
+            pagination: true,
+            paginationPageSize :  500,
 
             columnDefs: [
-                //{headerName: 'id', field: 'id', sortable: true, filter: true, editable:false},
 
+                /*{headerName: 'id',
+                    field: 'id',
+                    sortable: true,
+                    filter: true,
+                    editable: false,
+                    hide: false,
+                    //minWidth: 10,
+                    width:1
+                },*/
 
                 {
                     headerName: 'formid',
@@ -172,7 +178,7 @@ class Search extends Component {
 
 
                     cellStyle: function (params) {
-                        if (params.data && params.data.historyChild == 1) {
+                        if (params.data && params.data.historyChild === 1) {
 
                             return {color: 'green',/* backgroundColor: 'green'*/};
                         } else {
@@ -182,7 +188,7 @@ class Search extends Component {
                     minWidth: 250,
                     sortable: true, filter: true, editable: false
                 },
-                {headerName: 'id', field: 'id', sortable: true, filter: true, editable: true, hide: true,},
+
                 {
                     headerName: 'programTitle',
                     field: 'programTitle',
@@ -206,10 +212,9 @@ class Search extends Component {
                 {
                     headerName: 'date conversion ', field: 'creation_date',
                     valueFormatter: function (params) {
-                        var res = moment.unix(params.value).format('D MMM YYYY HH:mm');
                         //var res = moment.unix(params.value).format('YYYY-MM-DD HH:MM:SS');
 
-                        return res;
+                        return moment.unix(params.value).format('D MMM YYYY HH:mm');
                     },
 
                     sortable: true, filter: true, editable: false
@@ -308,8 +313,10 @@ class Search extends Component {
                 // make every column editable
                 //editable: true,
                 // make every column use 'text' filter by default
-                filter: 'agTextColumnFilter',
-                floatingFilter: true,
+                flex: 1,
+                // Pour ajouter des filtres plus intelligents
+                //filter: 'agTextColumnFilter',
+                //floatingFilter: true,
                 resizable: true,
 
                 // allow every column to be aggregated
@@ -339,8 +346,8 @@ class Search extends Component {
             gridOptions: {
                 // specify which rows to expand
                 isRowMaster: params => {
-                    console.log("==");
-                    if (params && params.historyChild == 1) {
+
+                    if (params && params.historyChild === 1) {
 
                         return true;
                     } else {
@@ -368,7 +375,7 @@ class Search extends Component {
 
         /*this.clickedChoice = this.clickedChoice.bind(this);*/
         this.onModalDeleteResult = this.onModalDeleteResult.bind(this)
-        this.handleSubmitCreateUuid = this.handleSubmitCreateUuid.bind(this);
+        //this.handleSubmitCreateUuid = this.handleSubmitCreateUuid.bind(this);
         this.handleModalClose = this.handleModalClose.bind(this);
         this.onFormSubmit = this.onFormSubmit.bind(this);
         this.synchronizeDBContent = this.synchronizeDBContent.bind(this);
@@ -376,8 +383,24 @@ class Search extends Component {
         this.getDetailRowData = this.getDetailRowData.bind(this);
 
         this.onChangeConversionType = this.onChangeConversionType.bind(this);
+        this.onChangePaginationMode = this.onChangePaginationMode.bind(this);
         this.onChangeAreaJSON = this.onChangeAreaJSON.bind(this);
         this.filterRowByGroup = this.filterRowByGroup.bind(this);
+        this.onHandleChangePaginationPageSizeDefault = this.onHandleChangePaginationPageSizeDefault.bind(this);
+
+
+    }
+    onHandleChangePaginationPageSizeDefault(event){
+        console.log("onHandleChangePaginationPageSizeDefault");
+        if ( event.target.value !== "" ) {
+            this.paginationPageSizeDefault = parseInt(event.target.value);
+        }else{
+            this.paginationPageSizeDefault=0;
+        }
+
+       // this.gridApi.gridOptionsWrapper.setProperty('paginationPageSize', this.paginationPageSizeDefault)
+
+            this.setState({paginationPageSize: this.paginationPageSizeDefault, paginationCB: false})
 
 
     }
@@ -389,15 +412,15 @@ class Search extends Component {
 
     }
     filterRowByGroup( status ){
-        var that = this;
-        if ( status == true){
+        const that = this;
+        if ( status === true){
             // On redessine en supprimant
             this.state.gridOptions.api.forEachNode(function (rowNode) {
                 console.log("delete")
 
-                var selectedData = rowNode.data
-                if (selectedData.historyChild == 0) {
-                    var res = that.state.gridOptions.api.applyTransaction({remove: [selectedData]});
+                const selectedData = rowNode.data;
+                if (selectedData.historyChild === 0) {
+                    that.state.gridOptions.api.applyTransaction({remove: [selectedData]});
                 }
 
 
@@ -418,9 +441,27 @@ class Search extends Component {
         }
 
     }
+    onChangePaginationMode(event){
+
+        if (event && event.target && event.target.name) {
+            if (event.target.checked === true) {
+                this.gridApi.gridOptionsWrapper.setProperty('paginationPageSize', 500)
+                this.setState({paginationPageSize: 500})
+            } else {
+
+
+                this.gridApi.gridOptionsWrapper.setProperty('paginationPageSize', this.paginationPageSizeDefault)
+                this.setState({paginationPageSize: this.paginationPageSizeDefault})
+            }
+            this.setState({ paginationCB: event.target.checked   }, () => {
+
+
+            })
+        }
+    }
 
     onChangeConversionType(event) {
-        var that = this;
+        //var that = this;
         if (event && event.target && event.target.name) {
 
             this.filterRowByGroup(event.target.checked)
@@ -450,7 +491,7 @@ class Search extends Component {
     }
 
     getDetailRowData(params) {
-        params.successCallback(tt);
+        //params.successCallback(tt);
 
         //setTimeout(function() {  params.api.refreshView(  );; }, 0)
 
@@ -492,7 +533,7 @@ class Search extends Component {
 
             if (data && data.data && data.data.affilae_data) {
 
-                var str = JSON.parse(data.data.affilae_data);
+                const str = JSON.parse(data.data.affilae_data);
                 this.setState({currentSelection: data, my_important_json: str})
             }
         }
@@ -587,7 +628,7 @@ class Search extends Component {
         console.log("onClickedAction");
         if (data && data.affilae_data) {
 
-            var str = JSON.parse(data.affilae_data);
+            let str = JSON.parse(data.affilae_data);
             this.mycurrent.setState({show: true, currentSelection: data, my_important_json: str})
         } else {
             this.mycurrent.setState({show: true, currentSelection: data})
@@ -604,12 +645,14 @@ class Search extends Component {
         //var currentChoice = this.mycurrent.state.choice;
 
 
-        var session_url = `${API_URL}/addconversion?api_key=${API_KEY}`;
-        var username = 'jpl';
-        var password = 'jpl';
+        let session_url = `${API_URL}/addconversion?api_key=${API_KEY}`;
 
-        var auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
-        var config = {
+
+        /*let username = 'jpl';
+        let password = 'jpl';
+        let auth = "Basic " + new Buffer(username + ":" + password).toString("base64");*/
+
+        let config = {
             method: 'POST',
             withCredentials: true,
             "headers": {
@@ -619,7 +662,7 @@ class Search extends Component {
             body: JSON.stringify(data)
 
         };
-        var that = this;
+        let that = this;
         fetch(session_url, config)
             .then(response => response.json())
 
@@ -682,7 +725,7 @@ class Search extends Component {
     }
 
     deleteRowClicked() {
-        var selected = this.gridApi.getFocusedCell();
+        let selected = this.gridApi.getFocusedCell();
         this.deleteId(this.state.results[selected.rowIndex].id);
         this.state.results.splice(selected.rowIndex, 1);
         this.gridApi.setRowData(this.state.results);
@@ -710,18 +753,19 @@ class Search extends Component {
     synchronizeDBContent() {
         console.log("synchronize required");
         this.setState({progressbar: true}, () => {
-            var session_url = `${API_URL}/synchronize?api_key=${API_KEY}`;
-            var username = 'jpl';
-            var password = 'jpl';
+            let session_url = `${API_URL}/synchronize?api_key=${API_KEY}`;
 
-            var data = {};
+
+            let data = {};
             data.program = {};
             data.program.title = this.state.currentProgramId;
             data.limit = 20;
 
-            var auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
-
-            var config = {
+            /*let username = 'jpl';
+            let password = 'jpl';
+            let auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+*/
+            let config = {
                 method: 'POST',
                 withCredentials: true,
                 "headers": {
@@ -740,8 +784,7 @@ class Search extends Component {
                 } else {
                     //that.ErrorInfo = {status: res.status, url: res.url, statusText: res.statusText}
                 }
-                var p = res.json();
-                return p;
+                return res.json();
             })
                 .then(function (data) {
 
@@ -772,12 +815,12 @@ class Search extends Component {
 
     getDBContent() {
 
-        var session_url = `${API_URL}/fetch?api_key=${API_KEY}&prefix=${this.state.query}&limit=7`;
-        var username = 'jpl';
-        var password = 'jpl';
+        let session_url = `${API_URL}/fetch?api_key=${API_KEY}&prefix=${this.state.query}&limit=7`;
+        /*let username = 'jpl';
+        let password = 'jpl';
+        let auth = "Basic " + new Buffer(username + ":" + password).toString("base64");*/
 
-        var auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
-        var config = {
+        let config = {
             withCredentials: true,
             "headers": {
                 //"Authorization": auth
@@ -793,8 +836,8 @@ class Search extends Component {
             } else {
                 //that.ErrorInfo = {status: res.status, url: res.url, statusText: res.statusText}
             }
-            var p = res.json();
-            return p;
+
+            return res.json();
         })
             .then(function (data) {
 
@@ -823,12 +866,12 @@ class Search extends Component {
     }
 
     deleteId(idToDelete) {
-        var session_url = `${API_URL}/delete/${idToDelete}?api_key=${API_KEY}&prefix=${this.state.query}&limit=7`;
-        var username = 'jpl';
-        var password = 'jpl';
+        let session_url = `${API_URL}/delete/${idToDelete}?api_key=${API_KEY}&prefix=${this.state.query}&limit=7`;
+        /*let username = 'jpl';
+        let password = 'jpl';
+        let auth = "Basic " + new Buffer(username + ":" + password).toString("base64");*/
 
-        var auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
-        var config = {
+        let config = {
             withCredentials: true,
             "headers": {
                 //"Authorization": auth
@@ -848,7 +891,7 @@ class Search extends Component {
 
             return;
         })
-            .then(function (data) {
+            .then(function () {
 
                 console.log('Delete: block deleted');
 
@@ -890,7 +933,7 @@ class Search extends Component {
 
 
 
-    handleSubmitCreateUuid(event) {
+    /*handleSubmitCreateUuid(event) {
         var data = [];
         data.push({"id": this.state.id, "name": this.state.name, "status": this.state.status,});
 
@@ -922,9 +965,9 @@ class Search extends Component {
             }
             //var p = res.json();
             //return p;
-            return;
+
         })
-            .then(function (data) {
+            .then(function () {
 
                 console.log('Add: Block added');
                 that.getDBContent();
@@ -944,7 +987,7 @@ class Search extends Component {
         event.preventDefault();
 
     }
-
+*/
     handleModalClose() {
         this.setState({show: false})
     }
@@ -952,11 +995,11 @@ class Search extends Component {
     onFormSubmit(data) {
         console.log("Form");
 
-        var commission = "";
-        var amount = 0;
-        var prefix = "";
+        let commission = "";
+        let amount = 0;
+        let prefix = "";
 
-        for (var i = 0; i < data.target.length; i++) {
+        for (let i = 0; i < data.target.length; i++) {
 
             if (data.target[i].id === "action_commission") {
                 commission = data.target[i].value
@@ -971,7 +1014,7 @@ class Search extends Component {
         }
         //this.state.my_important_json
 
-        var dataInput = {};
+        let dataInput = {};
         dataInput.commission = commission;
         dataInput.amount = amount;
         //dataInput.identity = identity;
@@ -1004,12 +1047,12 @@ class Search extends Component {
             if (result[j] && result[j].affilae_data) {
 
 
-                var dataline = JSON.parse(result[j].affilae_data);
-                var partnership_id = "";
+                let dataline = JSON.parse(result[j].affilae_data);
+                let partnership_id = "";
                 if (dataline && dataline.funnel) {
-                    var localfunnel = dataline.funnel;
-                    var partnership_id_status = false;
-                    for (var i = 0; i < localfunnel.length; i++) {
+                    let localfunnel = dataline.funnel;
+                    let partnership_id_status = false;
+                    for (let i = 0; i < localfunnel.length; i++) {
                         if (localfunnel[i] && localfunnel[i].partnership) {
 
                             if (localfunnel[i].percent && localfunnel[i].percent === 100) {
@@ -1056,8 +1099,8 @@ class Search extends Component {
         }
 
         const RefreshButton = [];
-        var variant = this.syncButtonVariant;
-        var color = this.syncButtonColor;
+        let variant = this.syncButtonVariant;
+        let color = this.syncButtonColor;
         RefreshButton.push(
             <Button variant={variant} color={color} onClick={() => {
                 this.synchronizeDBContent()
@@ -1065,8 +1108,8 @@ class Search extends Component {
         );
 
         const FilterDataButton = [];
-        var variant = this.syncButtonVariant;
-        var color = this.syncButtonColor;
+        //variant = this.syncButtonVariant;
+        //var color = this.syncButtonColor;
         FilterDataButton.push(
             //<Button   variant={"contained"} color={"primary"}  size="small" onClick={() => { this.onChangeConversionType() }}>only group</Button>
             <FormControlLabel
@@ -1077,15 +1120,34 @@ class Search extends Component {
                         name="checkedB"
                         onChange={this.onChangeConversionType}
                         inputProps={{'aria-label': 'secondary checkbox'}}
-                        only group
+
                     />
                 }
                 label="only group"
             />
         );
 
-        const AreaJSONData = [];
+        const PaginationDataButton = [];
+        //var variant = this.syncButtonVariant;
+        //var color = this.syncButtonColor;
+        PaginationDataButton.push(
+            //<Button   variant={"contained"} color={"primary"}  size="small" onClick={() => { this.onChangeConversionType() }}>only group</Button>
+            <FormControlLabel
+                control={
+                    <Checkbox
+                        checked={this.state.paginationCB}
+                        color="primary"
+                        name="paginationCB"
+                        onChange={this.onChangePaginationMode}
+                        inputProps={{'aria-label': 'secondary checkbox'}}
 
+                    />
+                }
+                label="page full"
+            />
+        );
+
+        const AreaJSONData = [];
         AreaJSONData.push(
             //<Button   variant={"contained"} color={"primary"}  size="small" onClick={() => { this.onChangeConversionType() }}>only group</Button>
             <FormControlLabel
@@ -1102,6 +1164,21 @@ class Search extends Component {
                 label="json area"
             />
         );
+
+        const PaginationSizeDefault= [];
+        PaginationSizeDefault.push(
+            <FormControl fullWidth className={classes.margin}>
+                <InputLabel htmlFor="standard-adornment-amount">Page Size</InputLabel>
+                <Input
+                    id="standard-adornment-amount"
+                    value={this.paginationPageSizeDefault}
+                    onChange={this.onHandleChangePaginationPageSizeDefault}
+                    startAdornment={<InputAdornment position="start">nbr</InputAdornment>}
+                    labelWidth={60}
+                />
+            </FormControl>
+        );
+
 
         const ProgramDropdown = [];
         ProgramDropdown.push(
@@ -1159,15 +1236,9 @@ class Search extends Component {
             }
             this.error = {};
         }
-        const SettingsForm = [];
 
 
-        SettingsForm.push(
-
-        );
-
-
-        const CreateForm = [];
+        /*const CreateForm = [];
         CreateForm.push(
             <form onSubmit={this.handleSubmitCreateUuid}>
                 <h1>Create UUID Formulaire </h1>
@@ -1206,7 +1277,7 @@ class Search extends Component {
 
                 <button>Submit</button>
             </form>
-        )
+        )*/
 
         const ViewForm = [];
         ViewForm.push(
@@ -1241,7 +1312,8 @@ class Search extends Component {
                             columnDefs={this.state.columnDefs}
                             detailCellRenderer={'myDetailCellRenderer'}
                             //detailCellRendererParams = {this.detailCellRendererParams}
-                            pagination="true"
+                            pagination={this.state.pagination}
+                            paginationPageSize={this.state.paginationPageSize}
                             domLayout='autoHeight'
                             //ref={this.state.childRefBlockContent}
                             //columnDefs={this.state.columnDefs}
@@ -1251,7 +1323,7 @@ class Search extends Component {
 
                             rowSelection={this.state.rowSelection}
                             onCellClicked={this.onCellClicked}
-                            rowData={this.state.results} paginationPageSize="10"
+                            rowData={this.state.results}
                             //onSelectionChanged={this.onSelectionChanged}
                             frameworkComponents={this.state.frameworkComponents}
                             enableRangeSelection={true}
@@ -1272,7 +1344,7 @@ class Search extends Component {
         )
 
         const ControlledJSONAreaTabs = [];
-        if (this.state.areaJSONDataStatus == true) {
+        if (this.state.areaJSONDataStatus === true) {
 
 
             ControlledJSONAreaTabs.push(
@@ -1293,6 +1365,15 @@ class Search extends Component {
 
 
                 </Grid>
+                <Row className="align-items-center">
+                    <Col lg={{ span:8, offset: 3 }}>
+                        <h1>Conversion Management Tool</h1>
+                    </Col>
+                    <Col lg={1}>
+                        <h4>Version 1.0</h4>
+                    </Col>
+
+                </Row>
                 <Tabs>
                     <TabList>
                         <Tab>View</Tab>
@@ -1303,7 +1384,8 @@ class Search extends Component {
 
 
                     <TabPanel>
-                        <h1>FormId list in DB </h1>
+
+
                         <Grid container
                               direction="row"
                               justify="flex-end"
@@ -1311,24 +1393,43 @@ class Search extends Component {
 
 
                         </Grid>
-                        {FilterDataButton}
+                        <Row>
+
+                            <Col lg={{ span: 2, offset: 1 }}>
+                                {FilterDataButton}
+                            </Col>
+                            <Col lg={{ span: 2, offset: 0 }}>
+                                {PaginationDataButton}
+                            </Col>
+
+                        </Row>
                         {ViewForm}
                         {ControlledJSONAreaTabs}
 
                     </TabPanel>
 
                     <TabPanel>
-
-                        {ProgramDropdown}
-                        {RefreshButton}
-                        {AreaJSONData}
+                        <Row>
+                            {ProgramDropdown}
+                        </Row>
+                        <Row>
+                            {RefreshButton}
+                        </Row>
+                        <Row>
+                            {AreaJSONData}
+                        </Row>
+                        <Row>
+                            <Col xs={1} lg={1}>
+                                {PaginationSizeDefault}
+                            </Col>
+                        </Row>
 
                     </TabPanel>
                 </Tabs>
             </div>
         );
-        console.log("this.state.my_important_json:" + this.state.my_important_json)
-        console.log("this.state.currentSelection:" + this.state.currentSelection)
+        //console.log("this.state.my_important_json:" + this.state.my_important_json)
+        //console.log("this.state.currentSelection:" + this.state.currentSelection)
 
 
         return (
