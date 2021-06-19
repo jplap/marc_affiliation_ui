@@ -25,4 +25,6 @@ relancer apache
     # service apache2 start
     # service apache2 stop
 
-
+// Dockerisation d'une appli react
+// ------------------------------
+  https://mherman.org/blog/dockerizing-a-react-app/
