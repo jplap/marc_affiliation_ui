@@ -24,8 +24,8 @@ import {Alert, AlertTitle} from '@material-ui/lab';
 import {MasterDetailModule} from '@ag-grid-enterprise/master-detail';
 import {MenuModule} from '@ag-grid-enterprise/menu';
 
-import '@ag-grid-community/core/dist/styles/ag-grid.css';
-import '@ag-grid-community/core/dist/styles/ag-theme-alpine.css';
+//import '@ag-grid-community/core/dist/styles/ag-grid.css';
+//import '@ag-grid-community/core/dist/styles/ag-theme-alpine.css';
 //import {AllModules} from "@ag-grid-enterprise/all-modules";
 import {AllCommunityModules} from '@ag-grid-community/all-modules';
 
@@ -185,7 +185,7 @@ class Search extends Component {
                             return {color: 'red'/*, backgroundColor: 'green'*/};
                         }
                     },
-                    minWidth: 250,
+                    //minWidth: 250,
                     sortable: true, filter: true, editable: false
                 },
 
@@ -1310,6 +1310,7 @@ class Search extends Component {
                             masterDetail={this.masterDetail}
 
                             columnDefs={this.state.columnDefs}
+
                             detailCellRenderer={'myDetailCellRenderer'}
                             //detailCellRendererParams = {this.detailCellRendererParams}
                             pagination={this.state.pagination}
@@ -1395,10 +1396,10 @@ class Search extends Component {
                         </Grid>
                         <Row>
 
-                            <Col lg={{ span: 2, offset: 1 }}>
+                            <Col lg={{ span: 2, offset: 1 }} md={6}  xs={6}  >
                                 {FilterDataButton}
                             </Col>
-                            <Col lg={{ span: 2, offset: 0 }}>
+                            <Col lg={{ span: 2, offset: 0 }} md={6} xs={6} >
                                 {PaginationDataButton}
                             </Col>
 

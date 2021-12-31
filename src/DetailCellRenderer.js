@@ -71,13 +71,13 @@ class DetailCellRenderer extends Component {
             },
             {
                 field: 'status',
-                minWidth: 10
+                //minWidth: 10
             },
         ];
 
         this.defaultColDef = {
             flex: 1,
-            minWidth: 120,
+            //minWidth: 120,
             resizable: true
         };
 
@@ -194,11 +194,11 @@ class DetailCellRenderer extends Component {
     render () {
         return(
             <div className="full-width-panel">
-                <div className="full-width-details">
+
                     <h2>History</h2>
 
 
-                </div>
+
 
 
                 <AgGridReact
@@ -211,6 +211,7 @@ class DetailCellRenderer extends Component {
                     modules={AllCommunityModules}
                     onGridReady={this.onGridReady}
                 />
+
 
             </div>
         );
